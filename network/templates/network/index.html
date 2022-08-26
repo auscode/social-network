@@ -1,0 +1,31 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <div id = "newPost" class="row justify-content-center">
+        <div class="form-group col-6">
+            <form action ="{% url 'save_post' %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <input class="btn btn-primary col-2" type="submit" value="Post it" />
+                    <input class="form-control col-10" type="text" placeholder="tell to world">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="profile">
+        <div class="card text-center">
+            <div class="card-header">
+                following
+                <div id = "following-amount"><div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% comment %} {% block script %}
+    <script src="{% static 'network/inbox.js' %}"></script>
+{% endblock %} {% endcomment %}
