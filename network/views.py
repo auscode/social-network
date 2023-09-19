@@ -59,6 +59,8 @@ def register(request):
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+            profile = Profile(user=user)
+            profile.save()
         except IntegrityError:
             return render(
                 request, "network/register.html", {
@@ -73,16 +75,27 @@ def register(request):
 @login_required
 def save_post(request):
     if request.method == "POST":
-        form = Post(content=request.POST.get['content'])
-        form.creator = Profile.objects.get(user=request.user)
-        form.save()
+        content = request.POST.get('content')
+
+        if content:
+            # Attempt to retrieve the user's profile or create it if it doesn't exist
+            profile, created = Profile.objects.get_or_create(user=request.user)
+
+            # Create a new Post object and assign the user's profile as the creator
+            form = Post(content=content, creator=profile)
+            form.save()
+            return index(request)
+            # form = Post(content=request.POST.get('content'))
+            # form.creator = Profile.objects.get(user=request.user)
+            # form.save()
+        
     elif request.method == "PUT":
         data = json.loads(request.body)
         post_id = int(data["post_id"])
         new_content = data["new_content"]
         post = Post.objects.filter(id=post_id).first()
         if post.creator.user != request.user:
-            return HttpResponse(staus=401)
+            return HttpResponse(status=401)
         post.content = new_content
         post.save()
         return JsonResponse({"result": True}, status=200)
@@ -95,7 +108,7 @@ def save_post(request):
 
 @login_required
 def load_followed_posts(request):
-    followed_profiles = request.user.get_followed_profies.all()
+    followed_profiles = request.user.get_followed_profiles.all()
     print(followed_profiles)
     posts = Post.objects.filter(creator_in=followed_profiles).all()
     return paginated_posts(request, posts)
@@ -104,7 +117,7 @@ def load_followed_posts(request):
 def load_posts(request):
     profile = request.GET.get("profile", None)
     if profile:
-        posts = Post.object.all()
+        posts = Post.objects.all()
     return paginated_posts(request, posts)
 
 

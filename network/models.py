@@ -4,12 +4,14 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    id = models.AutoField(primary_key=True)
     pass
 
 
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     followers = models.ManyToManyField(User, related_name="get_followed_profiles")
+    id = models.AutoField(primary_key=True)
 
     def serialize(self, user):
         return {
@@ -37,6 +39,7 @@ class Post(models.Model):
     likes = models.ManyToManyField(
         Profile, blank=True, related_name="get_all_liked_posts"
     )
+    id = models.AutoField(primary_key=True)
 
     def serialize(self, user):
         return {
