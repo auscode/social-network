@@ -2,24 +2,7 @@
 {% load static %}
 
 {% block new_post %}
-
-<!-- add new post section -->
-{% if user.is_authenticated %}
-<div class="post-add-container">
-    <form action="{% url 'addPost' %}" method="POST">
-        {% csrf_token %}
-        <h3>Create a New Post</h3>
-        <hr>
-        <h5>Title: </h5> <input name="title"></input>
-        <br>
-        <br>
-        <textarea class="form-control rounded-0" name="postText" rows="3"></textarea>
-       
-        <br>
-        <input type="submit" value="Post" class="btn btn-primary mb-2">
-    </form>
-</div>
-{% endif %}
+<h1 class="ml-2">Following</h1>
 {% for post in page_obj %}
 <div class="post" id="{{post.id}}">
     <div class="content">
@@ -64,7 +47,7 @@
             <form class="like-form" id="{{post.id}}" method=post action="{% url 'like' post_id=post.id %}" style=" float: right;">
                 {% csrf_token %}
                 {% if user not in post.likes.all %}
-                {% comment %} <i onclick="myFunction(this)" class="fa fa-heart like{{post.id}}"  type="submit" value="Save"></i> {% endcomment %}
+                {% comment %} <i onclick="myFunction(this)" class="fa fa-heart  like{{post.id}}"  type="submit" value="Save"></i> {% endcomment %}
                     <button class="btn btn-dark like{{post.id}}" type="submit" value="Save"> Like </button>
                 {% else %}
                 {% comment %} <i onclick="myFunction(this)" class="fa fa-heart  like{{post.id}}" style="color:red;" type="submit" value="Save"></i> {% endcomment %}

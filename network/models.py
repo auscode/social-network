@@ -1,54 +1,56 @@
-from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
-    id = models.AutoField(primary_key=True)
-    pass
-
-
-class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    followers = models.ManyToManyField(User, related_name="get_followed_profiles")
-    id = models.AutoField(primary_key=True)
-
-    def serialize(self, user):
+    def serialize(self):
         return {
-            "profile_id": self.id,
-            "profile_username": self.user.username,
-            "followers": self.followers.count(),
-            "following": self.user.get_followed_profiles.count(),
-            "currently_following": not user.is_anonymous and self in user.get_followed_profiles.all(),
-            "follow_available": (not user.is_anonymous) and self.user != user
+            "id": self.id,
+            "name": self.username,
         }
 
     def __str__(self):
-        followers_str = ""
-        for follower in self.followers.all():
-            followers_str += " " + follower.username
-        return f"{self.user.username} (id {self.user.id}) - followed by {followers_str}"
+        return self.username
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    following = models.ManyToManyField(User, blank=True, related_name="following")
+    followers = models.ManyToManyField(User, blank=True, related_name="followers")
+
+    def serialize(self):
+        return {
+            "profileID": self.user.id,
+            "following": int(self.following.all().count()),
+            "followers": int(self.followers.all().count()),
+        }
 
 
 class Post(models.Model):
-    content = models.CharField(max_length=280)
-    created_date = models.DateTimeField(default=timezone.now)
-    creator = models.ForeignKey(
-        Profile, on_delete=models.CASCADE, related_name="get_all_posts"
-    )
-    likes = models.ManyToManyField(
-        Profile, blank=True, related_name="get_all_liked_posts"
-    )
-    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=64,default=None)
+    text = models.TextField(default=None)
+    likes = models.ManyToManyField('User', blank=True, related_name='likes')
+    creation_date = models.DateTimeField(null=True, default=None)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author", default=None)
 
-    def serialize(self, user):
+    def serialize(self):
         return {
             "id": self.id,
-            "content": self.content,
-            "created_date": self.created_date.strftime("%b %#d %Y, %I:%M %p"),
-            "creator_id": self.creator.id,
-            "creator_username": self.creator.user.username,
-            "likes": self.likes.count(),
-            "liked": not user.is_anonymous and self in Profile.objects.filter(user=user).first().get_all_liked_posts.all(),
-            "editable": self.creator.user == user
+            "title": self.title,
+            "text": self.text,
+            "likes": Like.objects.filter(post=self).count(),
+            "creation_date": self.creation_date.strftime("%b %d %Y, %I:%M %p"),
+            "author": self.author.username,
+            "author_id": self.author.id,
         }
+
+    def __str__(self):
+        return f"ID:{self.id} Title:{self.title} Text:{self.text} Likes:{self.like_set.count} Created:{self.creation_date} Author:{self.author}"
+
+
+class Like(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.post)

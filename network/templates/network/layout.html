@@ -2,52 +2,117 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>{% block title %}Social Network{% endblock %}</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel = "stylesheet">
-        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
-        {% block script %}
-            <script src="{% static 'network/index.js' %}"></script>
-        {% endblock %} 
-    </head>
-    <body>
+  <head>
+    <title>{% block title %}Social Network{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link href="{% static 'network/styles.css' %}" rel="stylesheet" />
+  </head>
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Network</a>
-          
-            <div>
-              <ul class="navbar-nav mr-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><strong>{{ user.username }}</strong></a>
-                    </li>
-                {% endif %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'index' %}">All Posts</a>
-                </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Following</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
-                {% endif %}
-              </ul>
-            </div>
-          </nav>
-        
-        <div class="body">
-            {% block body %}
-            {% endblock %}
-        </div>
-    </body>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="{% url 'index' %}"
+        ><strong>Network</strong></a
+      >
+
+      <div>
+        <ul class="navbar-nav mr-auto">
+          {% if user.is_authenticated %}
+          <!-- get current user -->
+          {{ request.user.id|json_script:"user_id" }}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'user' %}"
+              ><strong>{{ user.username }}</strong></a
+            >
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'allPosts' %}">All Posts</a>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'following' %}">Following</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+    <div id="here"></div>
+    <div class="body">{% block body %} {% endblock %}</div>
+    <div class="new_post">{% block new_post %} {% endblock %}</div>
+
+    <!-- JS -->
+    <div class="posts-view"></div>
+
+    <script src="{% static 'network/index.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  </body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    var token = "{{csrf_token}}";
+
+    function display_edit(post_id) {
+      document.getElementById("edit" + post_id).style.display = "";
+      document.getElementById("text-before" + post_id).style.display = "none";
+    }
+
+    $(document).ready(function () {
+      $(".like-form").submit(function (e) {
+        // prevent from refreshing
+        e.preventDefault();
+
+        const post_id = $(this).attr("id");
+
+        const text = $(`.like${post_id}`).text();
+        var trim = $.trim(text);
+
+        const url = $(this).attr("action");
+
+        const likes = $(`.like-count${post_id}`).text();
+        const trimCount = parseInt(likes);
+
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: {
+            csrfmiddlewaretoken: token,
+            post_id: post_id,
+          },
+          success: function (response) {
+            console.log("success", response);
+            if (trim === "Unlike") {
+              $(`.like${post_id}`).text("Like");
+              res = trimCount - 1;
+            } else {
+              $(`.like${post_id}`).text("Unlike");
+              res = trimCount + 1;
+            }
+            $(`.like-count${post_id}`).text(res);
+          },
+          error: function (response) {
+            console.log("Error", response);
+          },
+        });
+      });
+    });
+  </script>
 </html>

@@ -1,7 +1,7 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-<center>
+
     <h2>Login</h2>
 
     {% if message %}
@@ -11,14 +11,14 @@
     <form action="{% url 'login' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-            <input autofocus id="box-size" style="width: 25%;" class="form-control" type="text" name="username" placeholder="Username">
+            <input autofocus class="form-control" type="text" name="username" placeholder="Username">
         </div>
         <div class="form-group">
-            <input class="form-control" style="width: 25%;" id="box-size" type="password" name="password" placeholder="Password">
+            <input class="form-control" type="password" name="password" placeholder="Password">
         </div>
         <input class="btn btn-primary" type="submit" value="Login">
     </form>
 
     Don't have an account? <a href="{% url 'register' %}">Register here.</a>
-</center>
+
 {% endblock %}

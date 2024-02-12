@@ -1,0 +1,108 @@
+{% extends "network/layout.html" %} {% load static %} {% block new_post %}
+<h1 class="ml-2">All Post</h1>
+{% for post in page_obj %}
+<div class="post" id="{{post.id}}">
+  <div class="content">
+    <h3>{{post.title}}</h3>
+    <hr />
+
+    <div id="text-before{{post.id}}">
+      <h5>{{post.text}}</h5>
+    </div>
+
+    <div class="edit" id="edit{{post.id}}" style="display: none">
+      <form method="post" action="{% url 'edit_post' post_id=post.id %}">
+        {% csrf_token %}
+        <textarea rows="10" class="form-control textarea-edit" name="textarea">
+{{post.content}}</textarea
+        >
+        <br />
+        <div class="modal-footer">
+          <button class="btn btn-dark" type="submit" value="Save">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <br />
+    <div class="get-user">
+      <h5 style="font-size: 15px" onclick="get_profile('{{post.author.id}}')">
+        Created by: {{post.author}}
+      </h5>
+    </div>
+    <div class="date">
+      {% comment %} Date of creation: {% endcomment %}
+      <br />
+      {{post.creation_date}}
+    </div>
+    <div class="right-bottom" style="height: 60px">
+      {% if request.user == post.author %}
+      <div
+        class="likes"
+        style="cursor: pointer"
+        onclick="display_edit('{{post.id}}')"
+      >
+        Edit Post
+      </div>
+      {% endif %}
+
+      <div class="likes">
+        likes:
+        <div class="like-count{{post.id}}" style="float: right">
+          {{post.like_set.count}}
+        </div>
+      </div>
+      <form
+        class="like-form"
+        id="{{post.id}}"
+        method="post"
+        action="{% url 'like' post_id=post.id %}"
+        style="float: right"
+      >
+        {% csrf_token %} {% if user not in post.likes.all %} {% comment %}
+        <i
+          onclick="myFunction(this)"
+          class="fa fa-heart  like{{post.id}}"
+          type="submit"
+          value="Save"
+        ></i>
+        {% endcomment %}
+        <button class="btn btn-dark like{{post.id}}" type="submit" value="Save">
+          Like
+        </button>
+        {% else %} {% comment %}
+        <i
+          onclick="myFunction(this)"
+          class="fa fa-heart  like{{post.id}}"
+          style="color: red"
+          type="submit"
+          value="Save"
+        ></i>
+        {% endcomment %}
+        <button class="btn btn-dark like{{post.id}}" type="submit" value="Save">
+          Unlike
+        </button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<div class="pagination">
+  <span class="step-links">
+    {% if page_obj.has_previous %}
+    <a href="?page=1">&laquo; first</a>
+    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">next</a>
+    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+    {% endif %}
+  </span>
+</div>
+{% endblock %}

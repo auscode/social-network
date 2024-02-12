@@ -1,3 +1,45 @@
-/* input#box-size{
-    width: 25%;
-} */
+.post-add-container{
+    display: center;
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    border: 1px solid rgb(221, 218, 218);
+}
+.posts-container{
+    display: center;
+    padding: 20px;
+    margin: 20px;
+}
+.post{
+    background-color: powderblue;
+    border: 1px solid rgb(221, 218, 218);
+    padding: 20px;
+    margin: 20px;
+}
+.date{
+    font-size: 10px; 
+    color: gray;
+}
+.likes{
+    float: right;
+    padding: 0px 20px;
+}
+
+/* PROFILE CSS */
+.profile-container{
+    height: 20%;
+    width: 30%;
+    padding: 40px;
+    margin: 20px;
+    border: 1px solid rgb(221, 218, 218);
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+.btn-dark{
+    padding: 0px 15px;
+}
+
+.fa.active {
+    color: black;
+}
